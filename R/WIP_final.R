@@ -56,8 +56,9 @@ p
 
 
 #Boxplot creation function
+#Double bracket allows for user variable to be added into graph
 create_boxplot <- function(var){
-	temp <- ggplot(data=edited, aes(x=var, y=age, fill=var)) +
+	temp <- ggplot(data=edited, aes(x={{var}}, y=age, fill={{var}})) +
 		geom_boxplot() +
 		theme_minimal()
 	return(temp)
@@ -65,7 +66,7 @@ create_boxplot <- function(var){
 
 }
 
-create_boxplot(edited$gender)
+create_boxplot(gender)
 
 #ggplot(data=edited, aes(result)) +
 	#	geom_bar()
