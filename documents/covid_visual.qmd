@@ -1,5 +1,5 @@
 ---
-title: "Covid_test_visual"
+title: "Drive Thru COVID-19 Testing Data Results"
 format:
   html:
     theme: journal
@@ -11,7 +11,6 @@ execute:
 
 ```{r}
 #| message: false
-#| echo: false
 
 # Load data
 library(tidyverse)
@@ -44,34 +43,54 @@ label(edited$rec_ver_tat) <- "Time (hours) between received and test verificatio
 
 ```
 ## Table 1 - Summary Statistics
-The median and IQR for age is `r inline_text(table1, variable = "age")` years
+
 
 ```{r}
 #Load table
 #| echo: false
+
+
 table1 <- tbl_summary(
 	edited,
 	by = gender,
 	include = c(age, result, drive_thru_ind, col_rec_tat,
 							rec_ver_tat)) |>
 	add_overall(last = TRUE)
-
-summary(edited$age)
 table1
-```
-## Regression Results
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+pos_test <- inline_text(table1, variable = "result", level = "positive", column = "stat_0")
+
+```
+The median and IQR for age is `r gtsummary::inline_text(table1, variable = "age")` years old.
+
+The overall positive test results are `r pos_test` out of the total **15,524** tests conducted.
+
+
+
+## Regression Results 
+Dependent variable is y= age, regressed off of the following variables: result, gender, and clinic name
 
 ```{r}
-1 + 1
+#Create regression
+tbl_uvregression(
+	edited,
+	y = age,
+	include = c(result, gender, clinic_name),
+	method = lm)
+
 ```
 
-## Figure
+## Figure 1 - Boxplot of test results and age
+Results are color coded with the key in the graph
 
 ```{r}
-#| echo: false
-2 * 2
+#Create figure1
+
+figure1 <- ggplot(data=edited, aes(x=result, y=age, fill= result)) +
+		geom_boxplot() +
+	scale_fill_manual(values=c("grey", "red", "green")) + #adds manual colors in order of result
+	theme_minimal() #adds white background
+figure1
 ```
 
 The `echo: false` option disables the printing of code (only output is displayed).
