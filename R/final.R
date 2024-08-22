@@ -7,6 +7,7 @@ library(summarytools)
 library(ggplot2)
 library(broom.helpers)
 library(cardx)
+library(parameters)
 
 #Import Data
 raw_data <- readRDS(here::here("data/raw/raw_data.rds"))
@@ -20,13 +21,19 @@ edited <- raw_data |>
 #Label data
 		mutate(drive_thru_ind = factor(drive_thru_ind,
 																	 levels = c(0,1),
-																	 labels = c("No", "Yes")))
+																	 labels = c("No", "Yes")),
+
+					 )
 
 
 
 
 label(edited$col_rec_tat) <- "Time (hours) between collection and lab received"
 label(edited$rec_ver_tat) <- "Time (hours) between received and test verification"
+
+#Export Final dataset using here
+write_csv(edited, file = here("data/clean/clean.csv"))
+
 
 #Create gtsummary table (table1)
 table1 <- tbl_summary(

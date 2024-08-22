@@ -22,6 +22,7 @@ library(summarytools)
 library(ggplot2)
 library(broom.helpers)
 library(cardx)
+library(parameters)
 
 #Import Data
 raw_data <- readRDS(here::here("data/raw/raw_data.rds"))
@@ -37,11 +38,15 @@ edited <- raw_data |>
 																	 levels = c(0,1),
 																	 labels = c("No", "Yes")))
 
+
 label(edited$col_rec_tat) <- "Time (hours) between collection and lab received"
 label(edited$rec_ver_tat) <- "Time (hours) between received and test verification"
 
 
 ```
+## Data Description
+This data was collected from various COVID-19 sites, drive thru locations, and clinics. It focused primarily on the results from those under the age of 18 years old. 
+
 ## Table 1 - Summary Statistics
 
 
@@ -54,21 +59,36 @@ table1 <- tbl_summary(
 	edited,
 	by = gender,
 	include = c(age, result, drive_thru_ind, col_rec_tat,
-							rec_ver_tat)) |>
-	add_overall(last = TRUE)
-table1
+							rec_ver_tat),
+	label = list(
+		result ~ "Test Results",
+		drive_thru_ind ~ "Did use drive thru site",
+		col_rec_tat ~ "Time (hours) between collection of sample and lab received",
+		rec_ver_tat ~ "Time (hours) between lab received sample and test verifcation"
+	),
+	missing_text = "Missing") |>
+  add_overall(col_label = "**Total**") |> 
+  bold_labels() |> 
+  modify_footnote(everything() ~ NA) |> 
+  modify_header(label = "**Variable**")
 
 pos_test <- inline_text(table1, variable = "result", level = "positive", column = "stat_0")
+median_age <- gtsummary::inline_text(table1, variable = "age")
+
+
+table1
+
 
 ```
-The median and IQR for age is `r gtsummary::inline_text(table1, variable = "age")` years old.
+The median and IQR for age is `r median_age` years old.
 
 The overall positive test results are `r pos_test` out of the total **15,524** tests conducted.
 
 
 
 ## Regression Results 
-Dependent variable is y= age, regressed off of the following variables: result, gender, and clinic name
+Dependent variable is y= age, regressed off of the following variables: **result** , **gender**, and **clinic name**.
+
 
 ```{r}
 #Create regression
@@ -76,12 +96,23 @@ tbl_uvregression(
 	edited,
 	y = age,
 	include = c(result, gender, clinic_name),
-	method = lm)
+	label = list(
+		result ~ "Test Results",
+		gender ~ "Gender",
+		clinic_name ~ "Testing Location"
+	),
+	method = lm,
+	missing_text = "Missing") |>
+  bold_labels() |> 
+  modify_footnote(everything() ~ NA) |> 
+  modify_header(label = "**Variable**")
+	
 
 ```
 
 ## Figure 1 - Boxplot of test results and age
 Results are color coded with the key in the graph
+Boxplot findings are consistant with regression model findings between age and test results
 
 ```{r}
 #Create figure1
@@ -92,5 +123,3 @@ figure1 <- ggplot(data=edited, aes(x=result, y=age, fill= result)) +
 	theme_minimal() #adds white background
 figure1
 ```
-
-The `echo: false` option disables the printing of code (only output is displayed).
