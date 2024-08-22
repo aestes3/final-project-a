@@ -9,11 +9,57 @@ execute:
   error: true #run even if errors occur
 ---
 
-## Quarto
+```{r}
+#| message: false
+#| echo: false
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+# Load data
+library(tidyverse)
+library(gtsummary)
+library(here)
+library(janitor)
+library(Hmisc)
+library(summarytools)
+library(ggplot2)
+library(broom.helpers)
+library(cardx)
 
-## Running Code
+#Import Data
+raw_data <- readRDS(here::here("data/raw/raw_data.rds"))
+#Drop unnecessary variables and NA
+edited <- raw_data |>
+										select(c(subject_id, age, clinic_name,
+																			gender, test_id, result, drive_thru_ind,
+																			col_rec_tat, rec_ver_tat)) |>
+   na.omit() |>
+	
+#Label data
+		mutate(drive_thru_ind = factor(drive_thru_ind,
+																	 levels = c(0,1),
+																	 labels = c("No", "Yes")))
+
+label(edited$col_rec_tat) <- "Time (hours) between collection and lab received"
+label(edited$rec_ver_tat) <- "Time (hours) between received and test verification"
+
+
+```
+## Table 1 - Summary Statistics
+The median and IQR for age is `r inline_text(table1, variable = "age")` years
+
+```{r}
+#Load table
+#| echo: false
+table1 <- tbl_summary(
+	edited,
+	by = gender,
+	include = c(age, result, drive_thru_ind, col_rec_tat,
+							rec_ver_tat)) |>
+	add_overall(last = TRUE)
+
+summary(edited$age)
+table1
+```
+## Regression Results
 
 When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
 
@@ -21,7 +67,7 @@ When you click the **Render** button a document will be generated that includes 
 1 + 1
 ```
 
-You can add options to executable code like this
+## Figure
 
 ```{r}
 #| echo: false
