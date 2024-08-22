@@ -5,6 +5,8 @@ library(janitor)
 library(Hmisc)
 library(summarytools)
 library(ggplot2)
+library(broom.helpers)
+library(cardx)
 
 #Import Data
 raw_data <- readRDS(here::here("data/raw/raw_data.rds"))
@@ -47,6 +49,11 @@ tbl_uvregression(
 #Create figure
 library(ggplot2)
 
+#Previous barplot code - Obsolete
+#ggplot(data=edited, aes(result)) +
+#	geom_bar()
+#table(edited$result)
+
 #Boxplot with color coded results
 p <- ggplot(data=edited, aes(x=result, y=age, fill= result)) +
 		geom_boxplot() +
@@ -63,13 +70,10 @@ create_boxplot <- function(var){
 		theme_minimal()
 	return(temp)
 
-
 }
 
 create_boxplot(gender)
 
-#ggplot(data=edited, aes(result)) +
-	#	geom_bar()
-#table(edited$result)
+
 
 
